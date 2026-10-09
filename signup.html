@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Create an account — Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="auth.js"></script>
+<script>
+  // Already signed in? Skip straight to the app.
+  if (Auth.getSession()) { window.location.replace("index.html"); }
+</script>
+</head>
+<body style="background:var(--bg);">
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="brand-mark">$</span>
+      <h1 style="font-family:'Fraunces',serif; font-size:19px;">Ledger</h1>
+    </div>
+    <h2>Create your account</h2>
+    <div class="sub">Set up a login for your budget planner.</div>
+
+    <div class="auth-error" id="authError"></div>
+
+    <form class="auth-form" id="signupForm">
+      <div class="field">
+        <label for="displayName">Your name</label>
+        <input type="text" id="displayName" autocomplete="name" placeholder="e.g. Priya Sharma" required>
+      </div>
+      <div class="field">
+        <label for="username">Username or email</label>
+        <input type="text" id="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="new-password" minlength="6" required>
+      </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <input type="password" id="confirmPassword" autocomplete="new-password" minlength="6" required>
+      </div>
+      <button class="btn" type="submit">Create account</button>
+    </form>
+
+    <div class="auth-switch">Already have an account? <a href="login.html">Sign in</a></div>
+    <div class="auth-note">Stored only in this browser — there is no server. Don't reuse a real password.</div>
+  </div>
+</div>
+
+<script>
+  var form = document.getElementById("signupForm");
+  var errorEl = document.getElementById("authError");
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.classList.add("show");
+  }
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    errorEl.classList.remove("show");
+
+    var password = document.getElementById("password").value;
+    var confirm = document.getElementById("confirmPassword").value;
+    if (password !== confirm) {
+      showError("Passwords don't match.");
+      return;
+    }
+
+    var submitBtn = form.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    try {
+      var result = await Auth.signup(
+        document.getElementById("username").value,
+        password,
+        document.getElementById("displayName").value
+      );
+      if (result.ok) {
+        window.location.href = "index.html";
+      } else {
+        showError(result.error);
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      showError("Something went wrong creating your account. Please try again.");
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
